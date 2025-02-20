@@ -1,0 +1,71 @@
+---
+title: "Credit card fraud detection"
+format: html
+editor: visual
+---
+
+```{r echo=FALSE, warning=FALSE}
+# Load necessary libraries
+library(readr)
+library(dplyr)
+library(ggplot2)
+```
+
+
+```{r echo=FALSE, warning=FALSE}
+# Load the dataset
+data <- read_csv("data/creditcard.csv")
+
+head(data)
+```
+
+## About the data
+
+### Columns in the Credit Card Fraud Detection Dataset
+
+| Column Name | Description |
+|-------------|-------------|
+| Time        | Seconds elapsed between this transaction and the first transaction in the dataset. |
+| V1 to V28   | Anonymized features resulting from a PCA transformation. |
+| Amount      | The transaction amount. |
+| Class       | Target variable (0 for legitimate transactions, 1 for fraudulent transactions). |
+
+
+## Exploring the data
+
+```{r echo=FALSE, warning=FALSE}
+# Summary statistics of the dataset
+summary(data)
+
+# Check for missing values
+sum(is.na(data))
+
+# Distribution of the target variable (Class)
+table(data$Class)
+```
+
+
+```{r echo=FALSE, warning=FALSE}
+# Plot the distribution of the Amount variable with improved aesthetics
+ggplot(data, aes(x = Amount)) +
+  geom_histogram(binwidth = 50, fill = "skyblue", color = "black", alpha = 0.7) +
+  scale_x_continuous(limits = c(0, 2000), breaks = seq(0, 2000, by = 200)) +
+  scale_y_continuous(labels = scales::comma) +
+  labs(title = "Distribution of Transaction Amounts", x = "Transaction Amount ($)", y = "Frequency") +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+    axis.title.x = element_text(size = 14),
+    axis.title.y = element_text(size = 14),
+    axis.text = element_text(size = 12)
+  )
+```
+
+
+```{r echo=FALSE, warning=FALSE}
+# Plot the distribution of the Time variable
+ggplot(data, aes(x = Time)) +
+  geom_histogram(binwidth = 5000, fill = "green", color = "black") +
+  labs(title = "Distribution of Transaction Times", x = "Time (seconds)", y = "Frequency")
+```
+
