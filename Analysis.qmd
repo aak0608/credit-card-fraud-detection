@@ -4,8 +4,10 @@ format: html
 editor: visual
 ---
 
+
 # Introduction
 Credit card fraud is a growing concern in the financial sector, with fraudulent transactions causing significant financial losses to businesses and consumers. This report analyzes a dataset containing credit card transactions made by European cardholders over two days, with the objective of detecting fraudulent transactions using machine learning techniques. The dataset is highly imbalanced, with fraud cases accounting for only 0.172% of the total transactions. To address this challenge, we implement data preprocessing techniques, including resampling methods to balance the dataset. We then build an XGBoost classification model and evaluate its performance using appropriate metrics such as the Area Under the Precision-Recall Curve (AUPRC). Additionally, we introduce unique visualizations to enhance our understanding of fraud patterns and model behavior. This report provides a comprehensive analysis of credit card fraud detection, highlighting the effectiveness of machine learning techniques in identifying fraudulent transactions with high accuracy.
+
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 # Load necessary libraries
@@ -18,16 +20,19 @@ library(PRROC)
 library(xgboost)
 library(gridExtra)
 library(patchwork)
+library(DT)
+library(kableExtra)
+library(randomForest)
 ```
 
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 ## Load Dataset
 data <- fread("data/creditcard.csv")
+```
 
-dim(data)  # Check dataset dimensions
-
-head(data)
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+data %>% head() %>% DT::datatable()
 ```
 
 # About the data
@@ -41,20 +46,32 @@ head(data)
 | Amount      | The transaction amount. |
 | Class       | Target variable (0 for legitimate transactions, 1 for fraudulent transactions). |
 
+:::{.callout-note}
+
+The data has the dimensions of `r dim(data)`.
+
+:::
 
 ## Exploring the data
 
-```{r warning=FALSE}
-summary(data)  # Summary statistics
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+summary(data) %>% DT::datatable() # Summary statistics
 ```
 
 
-```{r warning=FALSE}
+```{r echo=FALSE, warning=FALSE, message=FALSE}
 ## Check Class Imbalance
-table(data$Class)
+
+new_table <- table(data$Class)
+
+kable(new_table, format = "html", table.attr = "class='table'") %>% 
+  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover"), position = "center") %>%
+  column_spec(1, border_right = TRUE) %>%  # Add a line between columns
+  row_spec(0, bold = TRUE, color = "white", background = "lightblue")
+
 ```
 
-```{r}
+```{r echo=FALSE, warning=FALSE, message=FALSE}
 # Visualizing Class Distribution with a new type of graph
 ggplot(data, aes(x = factor(Class), fill = factor(Class))) +
   geom_bar() +
@@ -76,6 +93,48 @@ data <- data[, -c("Time")]
 ```
 
 
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+## Splitting Data
+set.seed(123)
+index <- createDataPartition(data$Class, p = 0.8, list = FALSE)
+train_data <- data[index, ]
+test_data <- data[-index, ]
+
+## Handling Class Imbalance with ROSE
+train_data_balanced <- ROSE(Class ~ ., data = train_data, seed = 123)$data
+
+bal_table <- table(train_data_balanced$Class)  # Checking new balance
+
+kable(bal_table, format = "html", table.attr = "class='table'") %>% 
+  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover"), position = "center") %>%
+  column_spec(1, border_right = TRUE) %>%  # Add a line between columns
+  row_spec(0, bold = TRUE, color = "white", background = "lightblue")
+```
+
+# Model Training
+
+```{r}
+str(train_data_balanced$Class)  # Should show "Factor w/ 2 levels"
+
+```
+
+
+## Logistic Regression
+```{r}
+## Model Training & Comparison
+logistic_model <- glm(Class ~ ., data = train_data_balanced, family = binomial)
+logistic_preds <- predict(logistic_model, test_data, type = "response")
+logistic_class <- ifelse(logistic_preds > 0.5, 1, 0)
+logistic_cm <- confusionMatrix(factor(logistic_class), factor(test_data$Class))
+logistic_pr <- pr.curve(scores.class0 = logistic_preds, weights.class0 = test_data$Class, curve = TRUE)
+
+# PR Curves
+plot(logistic_pr, main = "Logistic Regression Precision-Recall Curve")
+```
+
+
+## XGBoost
+
 ```{r}
 ## Splitting Data
 set.seed(123)
@@ -89,7 +148,7 @@ train_data_balanced <- ROSE(Class ~ ., data = train_data, seed = 123)$data
 table(train_data_balanced$Class)  # Checking new balance
 ```
 
-## Model Training
+### Model Training
 
 ```{r}
 ## Model Training - XGBoost
@@ -110,7 +169,7 @@ params <- list(
 model <- xgb.train(params = params, data = train_matrix, nrounds = 100)
 ```
 
-## Model Predictions
+### Model Predictions
 
 ```{r}
 ## Predictions
@@ -118,7 +177,7 @@ preds <- predict(model, test_matrix)
 preds_class <- ifelse(preds > 0.5, 1, 0)
 ```
 
-## Model Evaluation
+### Model Evaluation
 
 ```{r}
 ## Evaluation
@@ -128,26 +187,27 @@ auprc <- pr.curve(scores.class0 = preds, weights.class0 = test_data$Class, curve
 print(conf_matrix)
 ```
 
-## Area Under the Precision-Recall Curve
+### Area Under the Precision-Recall Curve
 
 ```{r}
 plot(auprc)
 ```
 
-## Discussion of Results
 
-### Class Imbalance:
+### Discussion of Results
+
+#### Class Imbalance:
 
 - The dataset is highly imbalanced, with fraudulent transactions being only 0.172% of all transactions. 
 - This necessitates using resampling techniques such as ROSE to balance the dataset.
 
-### Data Preprocessing:
+#### Data Preprocessing:
 - Normalization was applied to the 'Amount' column to ensure uniform scaling. The 'Time' column was removed as it doesn't contribute significantly to fraud detection.
 
-### Model Performance:
+#### Model Performance:
 - The XGBoost model was trained with an AUC-PR (Area Under Precision-Recall Curve) metric, which is more suitable for imbalanced classification problems. The model was tuned with parameters like max_depth=6 and eta=0.1 to optimize performance.
 
-### Evaluation Metrics:
+#### Evaluation Metrics:
 - The confusion matrix shows a strong performance in fraud detection, minimizing false positives and negatives.
 - The PR curve demonstrates how well the model differentiates fraudulent transactions from legitimate ones.
 
@@ -168,5 +228,14 @@ ggplot(data, aes(x = Amount, fill = as.factor(Class))) +
   scale_fill_manual(values = c("#00AFBB", "#E7B800")) +
   labs(title = "Density Plot of Transaction Amount", x = "Amount", fill = "Class")
 
+```
+
+
+```{r}
+# Boxplot to detect anomalies
+ggplot(data, aes(x = factor(Class), y = Amount, fill = factor(Class))) +
+  geom_boxplot(outlier.colour = "red", outlier.shape = 16) +
+  labs(title = "Transaction Amounts by Class", x = "Class", y = "Amount") +
+  theme_minimal()
 ```
 
