@@ -20,40 +20,6 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for syntax highlighting */
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
 </style>
 
 
@@ -120,11 +86,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="introduction" class="level1">
 <h1>Introduction</h1>
-<p>Credit card fraud is a growing concern in the financial sector, with fraudulent transactions causing significant financial losses to businesses and consumers. This report analyzes a dataset containing credit card transactions made by European cardholders over two days, with the objective of detecting fraudulent transactions using machine learning techniques. The dataset is highly imbalanced, with fraud cases accounting for only 0.172% of the total transactions. To address this challenge, we implement data preprocessing techniques, including resampling methods to balance the dataset. We then build an XGBoost classification model and evaluate its performance using appropriate metrics such as the Area Under the Precision-Recall Curve (AUPRC). Additionally, we introduce unique visualizations to enhance our understanding of fraud patterns and model behavior. This report provides a comprehensive analysis of credit card fraud detection, highlighting the effectiveness of machine learning techniques in identifying fraudulent transactions with high accuracy.</p>
+<p>Credit card fraud is a growing concern in the financial industry, causing significant losses for banks and customers alike. With the rise of online transactions and digital payments, fraudsters have become increasingly sophisticated in exploiting security vulnerabilities. Detecting fraudulent transactions is a challenging task due to the highly imbalanced nature of fraud datasets, where fraudulent transactions represent only a small fraction of total transactions.</p>
+<p>The dataset used in this analysis is derived from real-world credit card transactions and contains anonymized features extracted using Principal Component Analysis (PCA). The goal is to build predictive models that can accurately distinguish between fraudulent and legitimate transactions, helping financial institutions prevent financial losses and enhance security measures.</p>
+</section>
+<section id="reading-the-data" class="level1">
+<h1>Reading the data</h1>
 <div class="cell">
 <div class="cell-output-display">
-<div class="datatables html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-634299e92984fc5357c5" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-634299e92984fc5357c5">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5","6"],[0,0,1,1,2,2],[-1.3598071336738,1.19185711131486,-1.35835406159823,-0.966271711572087,-1.15823309349523,-0.425965884412454],[-0.07278117330984971,0.26615071205963,-1.34016307473609,-0.185226008082898,0.877736754848451,0.960523044882985],[2.53634673796914,0.16648011335321,1.77320934263119,1.79299333957872,1.548717846511,1.14110934232219],[1.37815522427443,0.448154078460911,0.379779593034328,-0.863291275036453,0.403033933955121,-0.168252079760302],[-0.338320769942518,0.0600176492822243,-0.503198133318193,-0.0103088796030823,-0.407193377311653,0.42098688077219],[0.462387777762292,-0.0823608088155687,1.80049938079263,1.24720316752486,0.0959214624684256,-0.0297275516639742],[0.239598554061257,-0.0788029833323113,0.791460956450422,0.23760893977178,0.592940745385545,0.476200948720027],[0.0986979012610507,0.08510165491481041,0.247675786588991,0.377435874652262,-0.270532677192282,0.260314333074874],[0.363786969611213,-0.255425128109186,-1.51465432260583,-1.38702406270197,0.8177393082352939,-0.56867137571251],[0.0907941719789316,-0.166974414004614,0.207642865216696,-0.0549519224713749,0.753074431976354,-0.371407196834471],[-0.551599533260813,1.61272666105479,0.624501459424895,-0.226487263835401,-0.822842877946363,1.34126198001957],[-0.617800855762348,1.06523531137287,0.066083685268831,0.178228225877303,0.53819555014995,0.359893837038039],[-0.991389847235408,0.48909501589608,0.7172927314108311,0.507756869957169,1.3458515932154,-0.358090652573631],[-0.311169353699879,-0.143772296441519,-0.165945922763554,-0.28792374549456,-1.11966983471731,-0.137133700217612],[1.46817697209427,0.635558093258208,2.34586494901581,-0.631418117709045,0.175121130008994,0.517616806555742],[-0.470400525259478,0.463917041022171,-2.89008319444231,-1.0596472454325,-0.451449182813529,0.401725895589603],[0.207971241929242,-0.114804663102346,1.10996937869599,-0.684092786345479,-0.237033239362776,-0.0581328233640131],[0.0257905801985591,-0.183361270123994,-0.121359313195888,1.96577500349538,-0.0381947870352842,0.06865314944254319],[0.403992960255733,-0.145783041325259,-2.26185709530414,-1.2326219700892,0.803486924960175,-0.0331937877876282],[0.251412098239705,-0.0690831352230203,0.5249797252244039,-0.208037781160366,0.408542360392758,0.08496767206820489],[-0.018306777944153,-0.225775248033138,0.247998153469754,-0.108300452035545,-0.009430697132329189,-0.208253514656728],[0.277837575558899,-0.638671952771851,0.7716794019172289,0.00527359678253453,0.79827849458971,-0.559824796253248],[-0.110473910188767,0.101288021253234,0.909412262347719,-0.190320518742841,-0.137458079619063,-0.0263976679795373],[0.06692807491467311,-0.339846475529127,-0.689280956490685,-1.17557533186321,0.141266983824769,-0.371426583174346],[0.128539358273528,0.167170404418143,-0.327641833735251,0.647376034602038,-0.206009587619756,-0.232793816737034],[-0.189114843888824,0.125894532368176,-0.139096571514147,-0.221928844458407,0.502292224181569,0.105914779097957],[0.133558376740387,-0.00898309914322813,-0.0553527940384261,0.0627228487293033,0.219422229513348,0.253844224739337],[-0.0210530534538215,0.0147241691924927,-0.0597518405929204,0.0614576285006353,0.215153147499206,0.08108025692294429],[149.62,2.69,378.66,123.5,69.98999999999999,3.67],[0,0,0,0,0,0]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Time<\/th>\n      <th>V1<\/th>\n      <th>V2<\/th>\n      <th>V3<\/th>\n      <th>V4<\/th>\n      <th>V5<\/th>\n      <th>V6<\/th>\n      <th>V7<\/th>\n      <th>V8<\/th>\n      <th>V9<\/th>\n      <th>V10<\/th>\n      <th>V11<\/th>\n      <th>V12<\/th>\n      <th>V13<\/th>\n      <th>V14<\/th>\n      <th>V15<\/th>\n      <th>V16<\/th>\n      <th>V17<\/th>\n      <th>V18<\/th>\n      <th>V19<\/th>\n      <th>V20<\/th>\n      <th>V21<\/th>\n      <th>V22<\/th>\n      <th>V23<\/th>\n      <th>V24<\/th>\n      <th>V25<\/th>\n      <th>V26<\/th>\n      <th>V27<\/th>\n      <th>V28<\/th>\n      <th>Amount<\/th>\n      <th>Class<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-939485f337fd0ae55978" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-939485f337fd0ae55978">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5","6"],[0,0,1,1,2,2],[-1.3598071336738,1.19185711131486,-1.35835406159823,-0.966271711572087,-1.15823309349523,-0.425965884412454],[-0.07278117330984971,0.26615071205963,-1.34016307473609,-0.185226008082898,0.877736754848451,0.960523044882985],[2.53634673796914,0.16648011335321,1.77320934263119,1.79299333957872,1.548717846511,1.14110934232219],[1.37815522427443,0.448154078460911,0.379779593034328,-0.863291275036453,0.403033933955121,-0.168252079760302],[-0.338320769942518,0.0600176492822243,-0.503198133318193,-0.0103088796030823,-0.407193377311653,0.42098688077219],[0.462387777762292,-0.0823608088155687,1.80049938079263,1.24720316752486,0.0959214624684256,-0.0297275516639742],[0.239598554061257,-0.0788029833323113,0.791460956450422,0.23760893977178,0.592940745385545,0.476200948720027],[0.0986979012610507,0.08510165491481041,0.247675786588991,0.377435874652262,-0.270532677192282,0.260314333074874],[0.363786969611213,-0.255425128109186,-1.51465432260583,-1.38702406270197,0.8177393082352939,-0.56867137571251],[0.0907941719789316,-0.166974414004614,0.207642865216696,-0.0549519224713749,0.753074431976354,-0.371407196834471],[-0.551599533260813,1.61272666105479,0.624501459424895,-0.226487263835401,-0.822842877946363,1.34126198001957],[-0.617800855762348,1.06523531137287,0.066083685268831,0.178228225877303,0.53819555014995,0.359893837038039],[-0.991389847235408,0.48909501589608,0.7172927314108311,0.507756869957169,1.3458515932154,-0.358090652573631],[-0.311169353699879,-0.143772296441519,-0.165945922763554,-0.28792374549456,-1.11966983471731,-0.137133700217612],[1.46817697209427,0.635558093258208,2.34586494901581,-0.631418117709045,0.175121130008994,0.517616806555742],[-0.470400525259478,0.463917041022171,-2.89008319444231,-1.0596472454325,-0.451449182813529,0.401725895589603],[0.207971241929242,-0.114804663102346,1.10996937869599,-0.684092786345479,-0.237033239362776,-0.0581328233640131],[0.0257905801985591,-0.183361270123994,-0.121359313195888,1.96577500349538,-0.0381947870352842,0.06865314944254319],[0.403992960255733,-0.145783041325259,-2.26185709530414,-1.2326219700892,0.803486924960175,-0.0331937877876282],[0.251412098239705,-0.0690831352230203,0.5249797252244039,-0.208037781160366,0.408542360392758,0.08496767206820489],[-0.018306777944153,-0.225775248033138,0.247998153469754,-0.108300452035545,-0.009430697132329189,-0.208253514656728],[0.277837575558899,-0.638671952771851,0.7716794019172289,0.00527359678253453,0.79827849458971,-0.559824796253248],[-0.110473910188767,0.101288021253234,0.909412262347719,-0.190320518742841,-0.137458079619063,-0.0263976679795373],[0.06692807491467311,-0.339846475529127,-0.689280956490685,-1.17557533186321,0.141266983824769,-0.371426583174346],[0.128539358273528,0.167170404418143,-0.327641833735251,0.647376034602038,-0.206009587619756,-0.232793816737034],[-0.189114843888824,0.125894532368176,-0.139096571514147,-0.221928844458407,0.502292224181569,0.105914779097957],[0.133558376740387,-0.00898309914322813,-0.0553527940384261,0.0627228487293033,0.219422229513348,0.253844224739337],[-0.0210530534538215,0.0147241691924927,-0.0597518405929204,0.0614576285006353,0.215153147499206,0.08108025692294429],[149.62,2.69,378.66,123.5,69.98999999999999,3.67],[0,0,0,0,0,0]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Time<\/th>\n      <th>V1<\/th>\n      <th>V2<\/th>\n      <th>V3<\/th>\n      <th>V4<\/th>\n      <th>V5<\/th>\n      <th>V6<\/th>\n      <th>V7<\/th>\n      <th>V8<\/th>\n      <th>V9<\/th>\n      <th>V10<\/th>\n      <th>V11<\/th>\n      <th>V12<\/th>\n      <th>V13<\/th>\n      <th>V14<\/th>\n      <th>V15<\/th>\n      <th>V16<\/th>\n      <th>V17<\/th>\n      <th>V18<\/th>\n      <th>V19<\/th>\n      <th>V20<\/th>\n      <th>V21<\/th>\n      <th>V22<\/th>\n      <th>V23<\/th>\n      <th>V24<\/th>\n      <th>V25<\/th>\n      <th>V26<\/th>\n      <th>V27<\/th>\n      <th>V28<\/th>\n      <th>Amount<\/th>\n      <th>Class<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
 </section>
@@ -180,10 +150,12 @@ Note
 <h2 class="anchored" data-anchor-id="exploring-the-data">Exploring the data</h2>
 <div class="cell">
 <div class="cell-output-display">
-<div class="datatables html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-3a24a82acc8e4b4ff65b" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-3a24a82acc8e4b4ff65b">{"x":{"filter":"none","vertical":false,"data":[["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["     Time","     Time","     Time","     Time","     Time","     Time","      V1","      V1","      V1","      V1","      V1","      V1","      V2","      V2","      V2","      V2","      V2","      V2","      V3","      V3","      V3","      V3","      V3","      V3","      V4","      V4","      V4","      V4","      V4","      V4","      V5","      V5","      V5","      V5","      V5","      V5","      V6","      V6","      V6","      V6","      V6","      V6","      V7","      V7","      V7","      V7","      V7","      V7","      V8","      V8","      V8","      V8","      V8","      V8","      V9","      V9","      V9","      V9","      V9","      V9","     V10","     V10","     V10","     V10","     V10","     V10","     V11","     V11","     V11","     V11","     V11","     V11","     V12","     V12","     V12","     V12","     V12","     V12","     V13","     V13","     V13","     V13","     V13","     V13","     V14","     V14","     V14","     V14","     V14","     V14","     V15","     V15","     V15","     V15","     V15","     V15","     V16","     V16","     V16","     V16","     V16","     V16","     V17","     V17","     V17","     V17","     V17","     V17","     V18","     V18","     V18","     V18","     V18","     V18","     V19","     V19","     V19","     V19","     V19","     V19","     V20","     V20","     V20","     V20","     V20","     V20","     V21","     V21","     V21","     V21","     V21","     V21","     V22","     V22","     V22","     V22","     V22","     V22","     V23","     V23","     V23","     V23","     V23","     V23","     V24","     V24","     V24","     V24","     V24","     V24","     V25","     V25","     V25","     V25","     V25","     V25","     V26","     V26","     V26","     V26","     V26","     V26","     V27","     V27","     V27","     V27","     V27","     V27","     V28","     V28","     V28","     V28","     V28","     V28","    Amount","    Amount","    Amount","    Amount","    Amount","    Amount","    Class","    Class","    Class","    Class","    Class","    Class"],["Min.   :     0  ","1st Qu.: 54202  ","Median : 84692  ","Mean   : 94814  ","3rd Qu.:139321  ","Max.   :172792  ","Min.   :-56.40751  ","1st Qu.: -0.92037  ","Median :  0.01811  ","Mean   :  0.00000  ","3rd Qu.:  1.31564  ","Max.   :  2.45493  ","Min.   :-72.71573  ","1st Qu.: -0.59855  ","Median :  0.06549  ","Mean   :  0.00000  ","3rd Qu.:  0.80372  ","Max.   : 22.05773  ","Min.   :-48.3256  ","1st Qu.: -0.8904  ","Median :  0.1799  ","Mean   :  0.0000  ","3rd Qu.:  1.0272  ","Max.   :  9.3826  ","Min.   :-5.68317  ","1st Qu.:-0.84864  ","Median :-0.01985  ","Mean   : 0.00000  ","3rd Qu.: 0.74334  ","Max.   :16.87534  ","Min.   :-113.74331  ","1st Qu.:  -0.69160  ","Median :  -0.05434  ","Mean   :   0.00000  ","3rd Qu.:   0.61193  ","Max.   :  34.80167  ","Min.   :-26.1605  ","1st Qu.: -0.7683  ","Median : -0.2742  ","Mean   :  0.0000  ","3rd Qu.:  0.3986  ","Max.   : 73.3016  ","Min.   :-43.5572  ","1st Qu.: -0.5541  ","Median :  0.0401  ","Mean   :  0.0000  ","3rd Qu.:  0.5704  ","Max.   :120.5895  ","Min.   :-73.21672  ","1st Qu.: -0.20863  ","Median :  0.02236  ","Mean   :  0.00000  ","3rd Qu.:  0.32735  ","Max.   : 20.00721  ","Min.   :-13.43407  ","1st Qu.: -0.64310  ","Median : -0.05143  ","Mean   :  0.00000  ","3rd Qu.:  0.59714  ","Max.   : 15.59500  ","Min.   :-24.58826  ","1st Qu.: -0.53543  ","Median : -0.09292  ","Mean   :  0.00000  ","3rd Qu.:  0.45392  ","Max.   : 23.74514  ","Min.   :-4.79747  ","1st Qu.:-0.76249  ","Median :-0.03276  ","Mean   : 0.00000  ","3rd Qu.: 0.73959  ","Max.   :12.01891  ","Min.   :-18.6837  ","1st Qu.: -0.4056  ","Median :  0.1400  ","Mean   :  0.0000  ","3rd Qu.:  0.6182  ","Max.   :  7.8484  ","Min.   :-5.79188  ","1st Qu.:-0.64854  ","Median :-0.01357  ","Mean   : 0.00000  ","3rd Qu.: 0.66251  ","Max.   : 7.12688  ","Min.   :-19.2143  ","1st Qu.: -0.4256  ","Median :  0.0506  ","Mean   :  0.0000  ","3rd Qu.:  0.4931  ","Max.   : 10.5268  ","Min.   :-4.49894  ","1st Qu.:-0.58288  ","Median : 0.04807  ","Mean   : 0.00000  ","3rd Qu.: 0.64882  ","Max.   : 8.87774  ","Min.   :-14.12985  ","1st Qu.: -0.46804  ","Median :  0.06641  ","Mean   :  0.00000  ","3rd Qu.:  0.52330  ","Max.   : 17.31511  ","Min.   :-25.16280  ","1st Qu.: -0.48375  ","Median : -0.06568  ","Mean   :  0.00000  ","3rd Qu.:  0.39968  ","Max.   :  9.25353  ","Min.   :-9.498746  ","1st Qu.:-0.498850  ","Median :-0.003636  ","Mean   : 0.000000  ","3rd Qu.: 0.500807  ","Max.   : 5.041069  ","Min.   :-7.213527  ","1st Qu.:-0.456299  ","Median : 0.003735  ","Mean   : 0.000000  ","3rd Qu.: 0.458949  ","Max.   : 5.591971  ","Min.   :-54.49772  ","1st Qu.: -0.21172  ","Median : -0.06248  ","Mean   :  0.00000  ","3rd Qu.:  0.13304  ","Max.   : 39.42090  ","Min.   :-34.83038  ","1st Qu.: -0.22839  ","Median : -0.02945  ","Mean   :  0.00000  ","3rd Qu.:  0.18638  ","Max.   : 27.20284  ","Min.   :-10.933144  ","1st Qu.: -0.542350  ","Median :  0.006782  ","Mean   :  0.000000  ","3rd Qu.:  0.528554  ","Max.   : 10.503090  ","Min.   :-44.80774  ","1st Qu.: -0.16185  ","Median : -0.01119  ","Mean   :  0.00000  ","3rd Qu.:  0.14764  ","Max.   : 22.52841  ","Min.   :-2.83663  ","1st Qu.:-0.35459  ","Median : 0.04098  ","Mean   : 0.00000  ","3rd Qu.: 0.43953  ","Max.   : 4.58455  ","Min.   :-10.29540  ","1st Qu.: -0.31715  ","Median :  0.01659  ","Mean   :  0.00000  ","3rd Qu.:  0.35072  ","Max.   :  7.51959  ","Min.   :-2.60455  ","1st Qu.:-0.32698  ","Median :-0.05214  ","Mean   : 0.00000  ","3rd Qu.: 0.24095  ","Max.   : 3.51735  ","Min.   :-22.565679  ","1st Qu.: -0.070840  ","Median :  0.001342  ","Mean   :  0.000000  ","3rd Qu.:  0.091045  ","Max.   : 31.612198  ","Min.   :-15.43008  ","1st Qu.: -0.05296  ","Median :  0.01124  ","Mean   :  0.00000  ","3rd Qu.:  0.07828  ","Max.   : 33.84781  ","Min.   :    0.00  ","1st Qu.:    5.60  ","Median :   22.00  ","Mean   :   88.35  ","3rd Qu.:   77.17  ","Max.   :25691.16  ","Min.   :0.000000  ","1st Qu.:0.000000  ","Median :0.000000  ","Mean   :0.001728  ","3rd Qu.:0.000000  ","Max.   :1.000000  "]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Var1<\/th>\n      <th>Var2<\/th>\n      <th>Freq<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-bf415e91d21189334589" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-bf415e91d21189334589">{"x":{"filter":"none","vertical":false,"data":[["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["     Time","     Time","     Time","     Time","     Time","     Time","      V1","      V1","      V1","      V1","      V1","      V1","      V2","      V2","      V2","      V2","      V2","      V2","      V3","      V3","      V3","      V3","      V3","      V3","      V4","      V4","      V4","      V4","      V4","      V4","      V5","      V5","      V5","      V5","      V5","      V5","      V6","      V6","      V6","      V6","      V6","      V6","      V7","      V7","      V7","      V7","      V7","      V7","      V8","      V8","      V8","      V8","      V8","      V8","      V9","      V9","      V9","      V9","      V9","      V9","     V10","     V10","     V10","     V10","     V10","     V10","     V11","     V11","     V11","     V11","     V11","     V11","     V12","     V12","     V12","     V12","     V12","     V12","     V13","     V13","     V13","     V13","     V13","     V13","     V14","     V14","     V14","     V14","     V14","     V14","     V15","     V15","     V15","     V15","     V15","     V15","     V16","     V16","     V16","     V16","     V16","     V16","     V17","     V17","     V17","     V17","     V17","     V17","     V18","     V18","     V18","     V18","     V18","     V18","     V19","     V19","     V19","     V19","     V19","     V19","     V20","     V20","     V20","     V20","     V20","     V20","     V21","     V21","     V21","     V21","     V21","     V21","     V22","     V22","     V22","     V22","     V22","     V22","     V23","     V23","     V23","     V23","     V23","     V23","     V24","     V24","     V24","     V24","     V24","     V24","     V25","     V25","     V25","     V25","     V25","     V25","     V26","     V26","     V26","     V26","     V26","     V26","     V27","     V27","     V27","     V27","     V27","     V27","     V28","     V28","     V28","     V28","     V28","     V28","    Amount","    Amount","    Amount","    Amount","    Amount","    Amount","    Class","    Class","    Class","    Class","    Class","    Class"],["Min.   :     0  ","1st Qu.: 54202  ","Median : 84692  ","Mean   : 94814  ","3rd Qu.:139321  ","Max.   :172792  ","Min.   :-56.40751  ","1st Qu.: -0.92037  ","Median :  0.01811  ","Mean   :  0.00000  ","3rd Qu.:  1.31564  ","Max.   :  2.45493  ","Min.   :-72.71573  ","1st Qu.: -0.59855  ","Median :  0.06549  ","Mean   :  0.00000  ","3rd Qu.:  0.80372  ","Max.   : 22.05773  ","Min.   :-48.3256  ","1st Qu.: -0.8904  ","Median :  0.1799  ","Mean   :  0.0000  ","3rd Qu.:  1.0272  ","Max.   :  9.3826  ","Min.   :-5.68317  ","1st Qu.:-0.84864  ","Median :-0.01985  ","Mean   : 0.00000  ","3rd Qu.: 0.74334  ","Max.   :16.87534  ","Min.   :-113.74331  ","1st Qu.:  -0.69160  ","Median :  -0.05434  ","Mean   :   0.00000  ","3rd Qu.:   0.61193  ","Max.   :  34.80167  ","Min.   :-26.1605  ","1st Qu.: -0.7683  ","Median : -0.2742  ","Mean   :  0.0000  ","3rd Qu.:  0.3986  ","Max.   : 73.3016  ","Min.   :-43.5572  ","1st Qu.: -0.5541  ","Median :  0.0401  ","Mean   :  0.0000  ","3rd Qu.:  0.5704  ","Max.   :120.5895  ","Min.   :-73.21672  ","1st Qu.: -0.20863  ","Median :  0.02236  ","Mean   :  0.00000  ","3rd Qu.:  0.32735  ","Max.   : 20.00721  ","Min.   :-13.43407  ","1st Qu.: -0.64310  ","Median : -0.05143  ","Mean   :  0.00000  ","3rd Qu.:  0.59714  ","Max.   : 15.59500  ","Min.   :-24.58826  ","1st Qu.: -0.53543  ","Median : -0.09292  ","Mean   :  0.00000  ","3rd Qu.:  0.45392  ","Max.   : 23.74514  ","Min.   :-4.79747  ","1st Qu.:-0.76249  ","Median :-0.03276  ","Mean   : 0.00000  ","3rd Qu.: 0.73959  ","Max.   :12.01891  ","Min.   :-18.6837  ","1st Qu.: -0.4056  ","Median :  0.1400  ","Mean   :  0.0000  ","3rd Qu.:  0.6182  ","Max.   :  7.8484  ","Min.   :-5.79188  ","1st Qu.:-0.64854  ","Median :-0.01357  ","Mean   : 0.00000  ","3rd Qu.: 0.66251  ","Max.   : 7.12688  ","Min.   :-19.2143  ","1st Qu.: -0.4256  ","Median :  0.0506  ","Mean   :  0.0000  ","3rd Qu.:  0.4931  ","Max.   : 10.5268  ","Min.   :-4.49894  ","1st Qu.:-0.58288  ","Median : 0.04807  ","Mean   : 0.00000  ","3rd Qu.: 0.64882  ","Max.   : 8.87774  ","Min.   :-14.12985  ","1st Qu.: -0.46804  ","Median :  0.06641  ","Mean   :  0.00000  ","3rd Qu.:  0.52330  ","Max.   : 17.31511  ","Min.   :-25.16280  ","1st Qu.: -0.48375  ","Median : -0.06568  ","Mean   :  0.00000  ","3rd Qu.:  0.39968  ","Max.   :  9.25353  ","Min.   :-9.498746  ","1st Qu.:-0.498850  ","Median :-0.003636  ","Mean   : 0.000000  ","3rd Qu.: 0.500807  ","Max.   : 5.041069  ","Min.   :-7.213527  ","1st Qu.:-0.456299  ","Median : 0.003735  ","Mean   : 0.000000  ","3rd Qu.: 0.458949  ","Max.   : 5.591971  ","Min.   :-54.49772  ","1st Qu.: -0.21172  ","Median : -0.06248  ","Mean   :  0.00000  ","3rd Qu.:  0.13304  ","Max.   : 39.42090  ","Min.   :-34.83038  ","1st Qu.: -0.22839  ","Median : -0.02945  ","Mean   :  0.00000  ","3rd Qu.:  0.18638  ","Max.   : 27.20284  ","Min.   :-10.933144  ","1st Qu.: -0.542350  ","Median :  0.006782  ","Mean   :  0.000000  ","3rd Qu.:  0.528554  ","Max.   : 10.503090  ","Min.   :-44.80774  ","1st Qu.: -0.16185  ","Median : -0.01119  ","Mean   :  0.00000  ","3rd Qu.:  0.14764  ","Max.   : 22.52841  ","Min.   :-2.83663  ","1st Qu.:-0.35459  ","Median : 0.04098  ","Mean   : 0.00000  ","3rd Qu.: 0.43953  ","Max.   : 4.58455  ","Min.   :-10.29540  ","1st Qu.: -0.31715  ","Median :  0.01659  ","Mean   :  0.00000  ","3rd Qu.:  0.35072  ","Max.   :  7.51959  ","Min.   :-2.60455  ","1st Qu.:-0.32698  ","Median :-0.05214  ","Mean   : 0.00000  ","3rd Qu.: 0.24095  ","Max.   : 3.51735  ","Min.   :-22.565679  ","1st Qu.: -0.070840  ","Median :  0.001342  ","Mean   :  0.000000  ","3rd Qu.:  0.091045  ","Max.   : 31.612198  ","Min.   :-15.43008  ","1st Qu.: -0.05296  ","Median :  0.01124  ","Mean   :  0.00000  ","3rd Qu.:  0.07828  ","Max.   : 33.84781  ","Min.   :    0.00  ","1st Qu.:    5.60  ","Median :   22.00  ","Mean   :   88.35  ","3rd Qu.:   77.17  ","Max.   :25691.16  ","Min.   :0.000000  ","1st Qu.:0.000000  ","Median :0.000000  ","Mean   :0.001728  ","3rd Qu.:0.000000  ","Max.   :1.000000  "]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Var1<\/th>\n      <th>Var2<\/th>\n      <th>Freq<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
+<section id="check-class-imbalance" class="level3">
+<h3 class="anchored" data-anchor-id="check-class-imbalance">Check Class Imbalance</h3>
 <div class="cell">
 <div class="cell-output-display">
 <table class="table table-striped table-hover caption-top table-sm small" data-quarto-postprocess="true">
@@ -208,6 +180,9 @@ Note
 
 </div>
 </div>
+</section>
+<section id="visualizing-class-distribution" class="level3">
+<h3 class="anchored" data-anchor-id="visualizing-class-distribution">Visualizing Class Distribution</h3>
 <div class="cell">
 <div class="cell-output-display">
 <div>
@@ -218,17 +193,52 @@ Note
 </div>
 </div>
 </section>
+<section id="correlation-heatmap" class="level3">
+<h3 class="anchored" data-anchor-id="correlation-heatmap">Correlation Heatmap</h3>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Analysis_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="density-plot-for-amount" class="level3">
+<h3 class="anchored" data-anchor-id="density-plot-for-amount">Density Plot for Amount</h3>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Analysis_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="boxplot-to-detect-anomalies" class="level3">
+<h3 class="anchored" data-anchor-id="boxplot-to-detect-anomalies">Boxplot to detect anomalies</h3>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Analysis_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
 <section id="data-preprocessing" class="level2">
 <h2 class="anchored" data-anchor-id="data-preprocessing">Data Preprocessing</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Data Preprocessing</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Normalize Amount</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>scaler <span class="ot">&lt;-</span> <span class="fu">preProcess</span>(data[, .(Amount)], <span class="at">method =</span> <span class="st">"range"</span>)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>data<span class="sc">$</span>Amount <span class="ot">&lt;-</span> <span class="fu">predict</span>(scaler, data[, .(Amount)])</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Remove Time column</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> data[, <span class="sc">-</span><span class="fu">c</span>(<span class="st">"Time"</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="datatables html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-bd8918e00ab3d5cfdb2a" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-bd8918e00ab3d5cfdb2a">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5","6"],[-1.3598071336738,1.19185711131486,-1.35835406159823,-0.966271711572087,-1.15823309349523,-0.425965884412454],[-0.07278117330984971,0.26615071205963,-1.34016307473609,-0.185226008082898,0.877736754848451,0.960523044882985],[2.53634673796914,0.16648011335321,1.77320934263119,1.79299333957872,1.548717846511,1.14110934232219],[1.37815522427443,0.448154078460911,0.379779593034328,-0.863291275036453,0.403033933955121,-0.168252079760302],[-0.338320769942518,0.0600176492822243,-0.503198133318193,-0.0103088796030823,-0.407193377311653,0.42098688077219],[0.462387777762292,-0.0823608088155687,1.80049938079263,1.24720316752486,0.0959214624684256,-0.0297275516639742],[0.239598554061257,-0.0788029833323113,0.791460956450422,0.23760893977178,0.592940745385545,0.476200948720027],[0.0986979012610507,0.08510165491481041,0.247675786588991,0.377435874652262,-0.270532677192282,0.260314333074874],[0.363786969611213,-0.255425128109186,-1.51465432260583,-1.38702406270197,0.8177393082352939,-0.56867137571251],[0.0907941719789316,-0.166974414004614,0.207642865216696,-0.0549519224713749,0.753074431976354,-0.371407196834471],[-0.551599533260813,1.61272666105479,0.624501459424895,-0.226487263835401,-0.822842877946363,1.34126198001957],[-0.617800855762348,1.06523531137287,0.066083685268831,0.178228225877303,0.53819555014995,0.359893837038039],[-0.991389847235408,0.48909501589608,0.7172927314108311,0.507756869957169,1.3458515932154,-0.358090652573631],[-0.311169353699879,-0.143772296441519,-0.165945922763554,-0.28792374549456,-1.11966983471731,-0.137133700217612],[1.46817697209427,0.635558093258208,2.34586494901581,-0.631418117709045,0.175121130008994,0.517616806555742],[-0.470400525259478,0.463917041022171,-2.89008319444231,-1.0596472454325,-0.451449182813529,0.401725895589603],[0.207971241929242,-0.114804663102346,1.10996937869599,-0.684092786345479,-0.237033239362776,-0.0581328233640131],[0.0257905801985591,-0.183361270123994,-0.121359313195888,1.96577500349538,-0.0381947870352842,0.06865314944254319],[0.403992960255733,-0.145783041325259,-2.26185709530414,-1.2326219700892,0.803486924960175,-0.0331937877876282],[0.251412098239705,-0.0690831352230203,0.5249797252244039,-0.208037781160366,0.408542360392758,0.08496767206820489],[-0.018306777944153,-0.225775248033138,0.247998153469754,-0.108300452035545,-0.009430697132329189,-0.208253514656728],[0.277837575558899,-0.638671952771851,0.7716794019172289,0.00527359678253453,0.79827849458971,-0.559824796253248],[-0.110473910188767,0.101288021253234,0.909412262347719,-0.190320518742841,-0.137458079619063,-0.0263976679795373],[0.06692807491467311,-0.339846475529127,-0.689280956490685,-1.17557533186321,0.141266983824769,-0.371426583174346],[0.128539358273528,0.167170404418143,-0.327641833735251,0.647376034602038,-0.206009587619756,-0.232793816737034],[-0.189114843888824,0.125894532368176,-0.139096571514147,-0.221928844458407,0.502292224181569,0.105914779097957],[0.133558376740387,-0.00898309914322813,-0.0553527940384261,0.0627228487293033,0.219422229513348,0.253844224739337],[-0.0210530534538215,0.0147241691924927,-0.0597518405929204,0.0614576285006353,0.215153147499206,0.08108025692294429],[0.005823793086804955,0.0001047052760560442,0.01473892187040212,0.004807100963911322,0.00272428337217938,0.0001428506926117777],[0,0,0,0,0,0]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>V1<\/th>\n      <th>V2<\/th>\n      <th>V3<\/th>\n      <th>V4<\/th>\n      <th>V5<\/th>\n      <th>V6<\/th>\n      <th>V7<\/th>\n      <th>V8<\/th>\n      <th>V9<\/th>\n      <th>V10<\/th>\n      <th>V11<\/th>\n      <th>V12<\/th>\n      <th>V13<\/th>\n      <th>V14<\/th>\n      <th>V15<\/th>\n      <th>V16<\/th>\n      <th>V17<\/th>\n      <th>V18<\/th>\n      <th>V19<\/th>\n      <th>V20<\/th>\n      <th>V21<\/th>\n      <th>V22<\/th>\n      <th>V23<\/th>\n      <th>V24<\/th>\n      <th>V25<\/th>\n      <th>V26<\/th>\n      <th>V27<\/th>\n      <th>V28<\/th>\n      <th>Amount<\/th>\n      <th>Class<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 </div>
+</div>
+<p>We first normalise the amount then remove <code>Time</code> column.</p>
 <div class="cell">
 <div class="cell-output-display">
 <table class="table table-striped table-hover caption-top table-sm small" data-quarto-postprocess="true">
@@ -258,7 +268,6 @@ Note
 <section id="model-training" class="level1">
 <h1>Model Training</h1>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(train_data_balanced<span class="sc">$</span>Class)  <span class="co"># Should show "Factor w/ 2 levels"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> int [1:227846] 0 0 0 0 0 0 0 0 0 0 ...</code></pre>
 </div>
@@ -266,22 +275,87 @@ Note
 <section id="logistic-regression" class="level2">
 <h2 class="anchored" data-anchor-id="logistic-regression">Logistic Regression</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Model Training &amp; Comparison</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>logistic_model <span class="ot">&lt;-</span> <span class="fu">glm</span>(Class <span class="sc">~</span> ., <span class="at">data =</span> train_data_balanced, <span class="at">family =</span> binomial)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</code></pre>
+<div class="cell-output cell-output-stdout">
+<pre><code>Confusion Matrix and Statistics
+
+          Reference
+Prediction     0     1
+         0 56229    17
+         1   625    90
+                                          
+               Accuracy : 0.9887          
+                 95% CI : (0.9878, 0.9896)
+    No Information Rate : 0.9981          
+    P-Value [Acc &gt; NIR] : 1               
+                                          
+                  Kappa : 0.2164          
+                                          
+ Mcnemar's Test P-Value : &lt;2e-16          
+                                          
+            Sensitivity : 0.9890          
+            Specificity : 0.8411          
+         Pos Pred Value : 0.9997          
+         Neg Pred Value : 0.1259          
+             Prevalence : 0.9981          
+         Detection Rate : 0.9871          
+   Detection Prevalence : 0.9874          
+      Balanced Accuracy : 0.9151          
+                                          
+       'Positive' Class : 0               
+                                          </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>logistic_preds <span class="ot">&lt;-</span> <span class="fu">predict</span>(logistic_model, test_data, <span class="at">type =</span> <span class="st">"response"</span>)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>logistic_class <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(logistic_preds <span class="sc">&gt;</span> <span class="fl">0.5</span>, <span class="dv">1</span>, <span class="dv">0</span>)</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>logistic_cm <span class="ot">&lt;-</span> <span class="fu">confusionMatrix</span>(<span class="fu">factor</span>(logistic_class), <span class="fu">factor</span>(test_data<span class="sc">$</span>Class))</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>logistic_pr <span class="ot">&lt;-</span> <span class="fu">pr.curve</span>(<span class="at">scores.class0 =</span> logistic_preds, <span class="at">weights.class0 =</span> test_data<span class="sc">$</span>Class, <span class="at">curve =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co"># PR Curves</span></span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(logistic_pr, <span class="at">main =</span> <span class="st">"Logistic Regression Precision-Recall Curve"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="logistic-regression-precision-recall-curve" class="level3">
+<h3 class="anchored" data-anchor-id="logistic-regression-precision-recall-curve">Logistic Regression Precision-Recall Curve</h3>
+<div class="cell">
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="Analysis_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="Analysis_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="random-forest" class="level2">
+<h2 class="anchored" data-anchor-id="random-forest">Random Forest</h2>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Confusion Matrix and Statistics
+
+          Reference
+Prediction     0     1
+         0 56803    20
+         1    51    87
+                                         
+               Accuracy : 0.9988         
+                 95% CI : (0.9984, 0.999)
+    No Information Rate : 0.9981         
+    P-Value [Acc &gt; NIR] : 0.0001363      
+                                         
+                  Kappa : 0.7096         
+                                         
+ Mcnemar's Test P-Value : 0.0003704      
+                                         
+            Sensitivity : 0.9991         
+            Specificity : 0.8131         
+         Pos Pred Value : 0.9996         
+         Neg Pred Value : 0.6304         
+             Prevalence : 0.9981         
+         Detection Rate : 0.9972         
+   Detection Prevalence : 0.9976         
+      Balanced Accuracy : 0.9061         
+                                         
+       'Positive' Class : 0              
+                                         </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Analysis_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -290,59 +364,15 @@ Note
 <section id="xgboost" class="level2">
 <h2 class="anchored" data-anchor-id="xgboost">XGBoost</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Splitting Data</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>index <span class="ot">&lt;-</span> <span class="fu">createDataPartition</span>(data<span class="sc">$</span>Class, <span class="at">p =</span> <span class="fl">0.8</span>, <span class="at">list =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>train_data <span class="ot">&lt;-</span> data[index, ]</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>test_data <span class="ot">&lt;-</span> data[<span class="sc">-</span>index, ]</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="do">## Handling Class Imbalance with ROSE</span></span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>train_data_balanced <span class="ot">&lt;-</span> <span class="fu">ROSE</span>(Class <span class="sc">~</span> ., <span class="at">data =</span> train_data, <span class="at">seed =</span> <span class="dv">123</span>)<span class="sc">$</span>data</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(train_data_balanced<span class="sc">$</span>Class)  <span class="co"># Checking new balance</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
      0      1 
 114086 113760 </code></pre>
 </div>
 </div>
-<section id="model-training-1" class="level3">
-<h3 class="anchored" data-anchor-id="model-training-1">Model Training</h3>
+<section id="model-training-and-evaluation" class="level3">
+<h3 class="anchored" data-anchor-id="model-training-and-evaluation">Model Training and Evaluation</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Model Training - XGBoost</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>train_matrix <span class="ot">&lt;-</span> <span class="fu">xgb.DMatrix</span>(<span class="at">data =</span> <span class="fu">as.matrix</span>(train_data_balanced[, <span class="sc">!</span><span class="fu">names</span>(train_data_balanced) <span class="sc">%in%</span> <span class="st">"Class"</span>]), </span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>                            <span class="at">label =</span> train_data_balanced<span class="sc">$</span>Class)</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>test_matrix <span class="ot">&lt;-</span> <span class="fu">xgb.DMatrix</span>(<span class="at">data =</span> <span class="fu">as.matrix</span>(test_data[, <span class="sc">-</span><span class="st">"Class"</span>, <span class="at">with =</span> <span class="cn">FALSE</span>]), </span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>                           <span class="at">label =</span> test_data<span class="sc">$</span>Class)</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">objective =</span> <span class="st">"binary:logistic"</span>,</span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">eval_metric =</span> <span class="st">"aucpr"</span>,</span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">max_depth =</span> <span class="dv">6</span>,</span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">eta =</span> <span class="fl">0.1</span></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">xgb.train</span>(<span class="at">params =</span> params, <span class="at">data =</span> train_matrix, <span class="at">nrounds =</span> <span class="dv">100</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</section>
-<section id="model-predictions" class="level3">
-<h3 class="anchored" data-anchor-id="model-predictions">Model Predictions</h3>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Predictions</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>preds <span class="ot">&lt;-</span> <span class="fu">predict</span>(model, test_matrix)</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>preds_class <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(preds <span class="sc">&gt;</span> <span class="fl">0.5</span>, <span class="dv">1</span>, <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</section>
-<section id="model-evaluation" class="level3">
-<h3 class="anchored" data-anchor-id="model-evaluation">Model Evaluation</h3>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Evaluation</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>conf_matrix <span class="ot">&lt;-</span> <span class="fu">confusionMatrix</span>(<span class="fu">factor</span>(preds_class), <span class="fu">factor</span>(test_data<span class="sc">$</span>Class))</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>auprc <span class="ot">&lt;-</span> <span class="fu">pr.curve</span>(<span class="at">scores.class0 =</span> preds, <span class="at">weights.class0 =</span> test_data<span class="sc">$</span>Class, <span class="at">curve =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(conf_matrix)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Confusion Matrix and Statistics
 
@@ -377,81 +407,10 @@ Prediction     0     1
 <section id="area-under-the-precision-recall-curve" class="level3">
 <h3 class="anchored" data-anchor-id="area-under-the-precision-recall-curve">Area Under the Precision-Recall Curve</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(auprc)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="Analysis_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
-<section id="discussion-of-results" class="level3">
-<h3 class="anchored" data-anchor-id="discussion-of-results">Discussion of Results</h3>
-<section id="class-imbalance" class="level4">
-<h4 class="anchored" data-anchor-id="class-imbalance">Class Imbalance:</h4>
-<ul>
-<li>The dataset is highly imbalanced, with fraudulent transactions being only 0.172% of all transactions.</li>
-<li>This necessitates using resampling techniques such as ROSE to balance the dataset.</li>
-</ul>
-</section>
-<section id="data-preprocessing-1" class="level4">
-<h4 class="anchored" data-anchor-id="data-preprocessing-1">Data Preprocessing:</h4>
-<ul>
-<li>Normalization was applied to the ‘Amount’ column to ensure uniform scaling. The ‘Time’ column was removed as it doesn’t contribute significantly to fraud detection.</li>
-</ul>
-</section>
-<section id="model-performance" class="level4">
-<h4 class="anchored" data-anchor-id="model-performance">Model Performance:</h4>
-<ul>
-<li>The XGBoost model was trained with an AUC-PR (Area Under Precision-Recall Curve) metric, which is more suitable for imbalanced classification problems. The model was tuned with parameters like max_depth=6 and eta=0.1 to optimize performance.</li>
-</ul>
-</section>
-<section id="evaluation-metrics" class="level4">
-<h4 class="anchored" data-anchor-id="evaluation-metrics">Evaluation Metrics:</h4>
-<ul>
-<li>The confusion matrix shows a strong performance in fraud detection, minimizing false positives and negatives.</li>
-<li>The PR curve demonstrates how well the model differentiates fraudulent transactions from legitimate ones.</li>
-</ul>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Correlation Heatmap</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(data, <span class="fu">aes</span>(<span class="at">x =</span> V1, <span class="at">y =</span> V2, <span class="at">color =</span> <span class="fu">as.factor</span>(Class))) <span class="sc">+</span></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"PCA Components V1 vs V2"</span>, <span class="at">color =</span> <span class="st">"Class"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="Analysis_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Density Plot for Amount</span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(data, <span class="fu">aes</span>(<span class="at">x =</span> Amount, <span class="at">fill =</span> <span class="fu">as.factor</span>(Class))) <span class="sc">+</span></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"#00AFBB"</span>, <span class="st">"#E7B800"</span>)) <span class="sc">+</span></span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Density Plot of Transaction Amount"</span>, <span class="at">x =</span> <span class="st">"Amount"</span>, <span class="at">fill =</span> <span class="st">"Class"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="Analysis_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Boxplot to detect anomalies</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(data, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">factor</span>(Class), <span class="at">y =</span> Amount, <span class="at">fill =</span> <span class="fu">factor</span>(Class))) <span class="sc">+</span></span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="at">outlier.colour =</span> <span class="st">"red"</span>, <span class="at">outlier.shape =</span> <span class="dv">16</span>) <span class="sc">+</span></span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Transaction Amounts by Class"</span>, <span class="at">x =</span> <span class="st">"Class"</span>, <span class="at">y =</span> <span class="st">"Amount"</span>) <span class="sc">+</span></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="Analysis_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="Analysis_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -459,6 +418,13 @@ Prediction     0     1
 </section>
 </section>
 </section>
+<section id="discussion-of-results" class="level1">
+<h1>Discussion of Results</h1>
+<ul>
+<li>Logistic Regression performs moderately well but struggles with imbalanced data.</li>
+<li>Random Forest improves performance by capturing complex interactions.</li>
+<li>XGBoost delivers the highest precision-recall score, making it the most effective for fraud detection.</li>
+</ul>
 </section>
 
 </main>
