@@ -82,9 +82,14 @@ kable(new_table, format = "html", table.attr = "class='table'") %>%
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
 ggplot(data, aes(x = factor(Class), fill = factor(Class))) +
-  geom_bar() +
-  scale_fill_manual(values = c("#00AFBB", "#E7B800")) +
-  labs(title = "Class Distribution", x = "Fraud (1) vs Non-Fraud (0)", y = "Count")
+  geom_bar(color = "black", size = 0.5) +
+  scale_fill_manual(values = c("#0073C2FF", "#EFC000FF")) +
+  theme_minimal() +
+  labs(title = "Class Distribution of Transactions", x = "Class (0: Non-Fraud, 1: Fraud)", y = "Count") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 14),
+        axis.title = element_text(face = "bold"),
+        legend.position = "none") +
+  scale_y_continuous(labels = scales::comma)
 ```
 
 ### Correlation Heatmap
