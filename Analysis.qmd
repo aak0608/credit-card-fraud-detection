@@ -54,6 +54,18 @@ data %>% head() %>% DT::datatable()
 
 The data has the dimensions of `r dim(data)`.
 
+### Dataset and Its Significance
+The dataset used in this analysis consists of anonymized credit card transactions, where each row represents a single transaction. Due to privacy concerns, the dataset does not include personally identifiable information but instead provides 28 principal components (V1 to V28) obtained using PCA. The dataset also includes the transaction amount and a binary label (`Class`), where:
+- `0` represents a legitimate (non-fraudulent) transaction.
+- `1` represents a fraudulent transaction.
+
+Detecting fraudulent transactions is particularly challenging because fraud cases are rare. The class imbalance means that naive models may predict most transactions as non-fraudulent and still achieve high accuracy, making it essential to use alternative evaluation metrics such as precision, recall, and the F1-score. 
+
+By exploring this dataset, we aim to uncover key patterns that distinguish fraudulent transactions from legitimate ones, aiding in the development of more robust fraud detection systems. Fraudulent transactions often exhibit distinct characteristics, such as unusual spending behavior, high transaction amounts, or rapid consecutive transactions from different locations. Understanding these patterns allows financial institutions to implement real-time fraud detection systems that minimize false positives while effectively identifying fraudulent activities.
+
+Additionally, credit card fraud detection relies heavily on machine learning algorithms due to the vast amount of transaction data generated every second. By leveraging supervised learning models and data preprocessing techniques such as PCA transformation and oversampling methods, we can enhance the detection of fraudulent activities. The findings from this study can help improve financial security measures and refine existing fraud detection systems by identifying high-risk transactions efficiently.
+
+
 :::
 
 ## Exploring the data
@@ -91,6 +103,26 @@ ggplot(data, aes(x = factor(Class), fill = factor(Class))) +
         legend.position = "none") +
   scale_y_continuous(labels = scales::comma)
 ```
+__Observation for Class Distribution Graph__
+
+The bar graph visually represents the distribution of fraudulent and non-fraudulent transactions in the dataset.
+
+- Severe Class Imbalance:
+
+1. The graph shows that the vast majority of transactions belong to the non-fraudulent class (0), while fraudulent transactions (1) make up a tiny fraction of the dataset.
+
+2. This extreme imbalance is a common challenge in fraud detection, as models may become biased toward predicting the majority class, leading to poor recall for fraud cases.
+
+- Impact on Model Performance:
+
+1. Since fraud transactions are rare, a naïve model that predicts all transactions as non-fraudulent would still achieve high accuracy.
+
+2. However, accuracy alone is misleading in this scenario, as the model would fail to correctly identify fraud cases, which is the primary objective of fraud detection.
+
+- Need for Resampling Techniques:
+
+Due to this imbalance, techniques such as oversampling, undersampling, or synthetic data generation (e.g., SMOTE or ROSE) are necessary to balance the dataset and improve model learning.
+
 
 ### Correlation Heatmap
 
@@ -137,7 +169,16 @@ data <- data[, -c("Time")]
 data %>% head() %>% DT::datatable()
 ```
 
-We first normalise the amount then remove `Time` column.
+1. We first normalise the amount then remove `Time` column.
+
+2. In this analysis, the ROSE (Random Over-Sampling Examples) method was applied to generate a more balanced training set.
+Practical Implications for Fraud Detection:
+
+3. In real-world applications, fraud detection models must prioritize high recall and precision, ensuring fraudulent transactions are flagged without overwhelming users with false positives.
+
+Banks and financial institutions must use sophisticated models such as XGBoost or Random Forest, which can handle imbalanced data more effectively than traditional logistic regression.
+
+we apply all 3 to discuss which works best for this dataset.
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 ## Splitting Data
