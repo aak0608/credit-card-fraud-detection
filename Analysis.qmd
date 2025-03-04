@@ -103,6 +103,8 @@ ggplot(data, aes(x = factor(Class), fill = factor(Class))) +
         legend.position = "none") +
   scale_y_continuous(labels = scales::comma)
 ```
+:::{.callout-note}
+
 __Observation for Class Distribution Graph__
 
 The bar graph visually represents the distribution of fraudulent and non-fraudulent transactions in the dataset.
@@ -123,6 +125,7 @@ The bar graph visually represents the distribution of fraudulent and non-fraudul
 
 Due to this imbalance, techniques such as oversampling, undersampling, or synthetic data generation (e.g., SMOTE or ROSE) are necessary to balance the dataset and improve model learning.
 
+:::
 
 ### Correlation Heatmap
 
@@ -137,13 +140,63 @@ ggplot(data, aes(x = V1, y = V2, color = as.factor(Class))) +
 ### Density Plot for Amount
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-
 ggplot(data, aes(x = Amount, fill = as.factor(Class))) +
-  geom_density(alpha = 0.5) +
-  scale_fill_manual(values = c("#00AFBB", "#E7B800")) +
-  labs(title = "Density Plot of Transaction Amount", x = "Amount", fill = "Class")
+  geom_density(alpha = 0.6) +
+  scale_fill_manual(values = c("#0073C2FF", "#EFC000FF")) +
+  theme_minimal() +
+  labs(title = "Density Distribution of Transaction Amounts", x = "Transaction Amount", y = "Density", fill = "Class") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
 
 ```
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+data$Amount_Category <- cut(data$Amount, 
+                            breaks = quantile(data$Amount, probs = seq(0, 1, by = 0.25), na.rm = TRUE), 
+                            labels = c("Low", "Medium", "High", "Very High"), 
+                            include.lowest = TRUE)
+
+ggplot(data, aes(x = Amount, fill = factor(Class))) +
+  geom_density(alpha = 0.5, adjust = 1.5) +
+  scale_fill_manual(values = c("#0073C2FF", "#EFC000FF")) +
+  facet_wrap(~Amount_Category, scales = "free") +
+  theme_classic() +
+  labs(title = "Density of Transaction Amount by Fraud Class", 
+       x = "Transaction Amount", 
+       y = "Density",
+       fill = "Class (0: Non-Fraud, 1: Fraud)") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 14),
+        axis.title = element_text(face = "bold"))
+
+
+```
+
+:::{.callout-note}
+
+Based on the density plots, some of the interesting observations are:
+
+__Fraudulent Transactions Show Distinct Density Distributions__
+
+Fraudulent transactions (Class 1) exhibit different density peaks compared to legitimate transactions (Class 0). The density for fraud cases is generally lower, but it is concentrated in specific transaction amount ranges.
+
+__Fraud Occurrence Increases with Higher Transaction Amounts__
+
+As we move to the "High" and "Very High" transaction amount categories, fraudulent transactions appear more frequently.This suggests that fraudsters often target higher-value transactions, possibly to maximize their financial gain.
+
+__Legitimate Transactions Are More Evenly Distributed__
+
+The density of legitimate transactions remains relatively high across all amount categories, indicating that customers make a wide range of purchases. Unlike fraudulent transactions, they do not exhibit sharp density spikes in specific ranges.
+
+__Overlapping Distributions in Lower Amount Categories__
+
+In the "Low" and "Medium" amount bins, there is significant overlap between fraudulent and legitimate transactions, making fraud detection more challenging in this range. This suggests that lower-value fraudulent transactions may be harder to differentiate from normal purchases.
+
+__Potential for Threshold-Based Fraud Detection__
+
+Given the differences in density, setting different risk thresholds based on transaction amount could improve fraud detection accuracy. Higher-value transactions might need stricter anomaly detection rules compared to low-value ones.
+
+:::
 
 
 ### Boxplot to detect anomalies
@@ -263,6 +316,11 @@ table(train_data_balanced$Class)  # Checking new balance
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 ## Model Training - XGBoost
 set.seed(123)
+
+# Ensure all features are numeric
+train_data_balanced[] <- lapply(train_data_balanced, function(x) as.numeric(as.character(x)))
+test_data[] <- lapply(test_data, function(x) as.numeric(as.character(x)))
+
 train_matrix <- xgb.DMatrix(data = as.matrix(train_data_balanced[, !names(train_data_balanced) %in% "Class"]), 
                             label = train_data_balanced$Class)
 
