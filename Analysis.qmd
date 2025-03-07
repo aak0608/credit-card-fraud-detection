@@ -127,15 +127,28 @@ Due to this imbalance, techniques such as oversampling, undersampling, or synthe
 
 :::
 
-### Correlation Heatmap
+### PCA Scatter Plot
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-
 ggplot(data, aes(x = V1, y = V2, color = as.factor(Class))) +
-  geom_point(alpha = 0.5) +
+  geom_point(alpha = 0.5, size = 1.5) +
+  scale_color_manual(values = c("#0073C2FF", "#EFC000FF")) +
   theme_minimal() +
-  labs(title = "PCA Components V1 vs V2", color = "Class")
+  labs(title = "PCA Components: V1 vs V2", x = "Principal Component 1 (V1)", y = "Principal Component 2 (V2)", color = "Class") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold")) +
+  geom_density_2d(color = "black", alpha = 0.3)
+
 ```
+
+:::{.callout-note}
+
+1. Fraudulent transactions (Class 1) are concentrated in distinct regions of the PCA-transformed space.
+
+2. Non-fraudulent transactions (Class 0) are more dispersed, indicating greater variation in their feature distribution.
+
+3. The clustering of fraudulent transactions suggests that certain PCA components can be useful in fraud detection.
+
+:::
 
 ### Density Plot for Amount
 
