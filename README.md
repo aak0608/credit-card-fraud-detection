@@ -53,7 +53,7 @@ install.packages(c("tidyverse", "data.table", "ggplot2", "caret", "ROSE", "PRROC
 - **Random Forest** improves performance by capturing non-linear relationships.
 - **XGBoost** achieves the best results with the highest precision-recall score, making it the most effective for fraud detection.
 
-## Authors
+## Author
 Aishwarya Anil Kumar
 
 ## License
